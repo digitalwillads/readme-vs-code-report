@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>README vs Code</title>
+<style>
+:root {
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #6f6d68;
+  --hair: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --good: #0ca30c; --warn: #fab219; --crit: #d03b3b; --none: #b4b2aa;
+  --real-bg: #fdf0f0; --partly-bg: #fff7e6; --code-bg: #f0efec; --accent: #2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a197;
+    --hair: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+    --none: #6d6b65; --real-bg: #2a1616; --partly-bg: #2a2212; --code-bg: #262624; --accent: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a197;
+  --hair: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --none: #6d6b65; --real-bg: #2a1616; --partly-bg: #2a2212; --code-bg: #262624; --accent: #3987e5;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.55 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 30px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 21px; margin: 44px 0 10px; padding-top: 8px; border-top: 1px solid var(--hair); }
+h3 { font-size: 17px; margin: 24px 0 8px; }
+h4 { font-size: 15px; margin: 18px 0 6px; color: var(--ink-2); }
+p { margin: 8px 0; }
+.sub { color: var(--ink-2); margin: 0 0 20px; font-size: 14px; }
+.answer { font-size: 19px; line-height: 1.5; max-width: 760px; }
+.answer + p { color: var(--ink-2); max-width: 760px; }
+code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg);
+  padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; word-break: break-word; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 22px 0 8px; }
+.tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; }
+.tile .v { font-size: 28px; font-weight: 650; line-height: 1.1; }
+.tile .l { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+.tile .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-2); margin: 10px 0; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px;
+  margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--ring); border-radius: 10px;
+  background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--hair); vertical-align: top; }
+thead th { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+  white-space: nowrap; }
+tbody th { font-weight: 550; }
+td { font-variant-numeric: tabular-nums; }
+tr:last-child th, tr:last-child td { border-bottom: 0; }
+tr.total th, tr.total td { font-weight: 650; border-top: 2px solid var(--axis); }
+.realn { color: var(--crit); font-weight: 600; white-space: nowrap; }
+.barcell { min-width: 90px; width: 20%; }
+.bar { display: flex; gap: 2px; height: 12px; margin-top: 4px; }
+.seg { border-radius: 3px; min-width: 3px; }
+.s-supported { background: var(--good); } .s-unclear { background: var(--warn); }
+.s-contradicted { background: var(--crit); } .s-no { background: var(--none); }
+ul.findings { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.finding { min-width: 0; border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; background: var(--surface); }
+.finding.real { border-left: 4px solid var(--crit); }
+.finding.partly { border-left: 4px solid var(--warn); }
+.finding .claim, ul.short .claim { font-weight: 550; }
+.meta, .jev, .nums { color: var(--muted); font-size: 13px; }
+.instead { margin-top: 10px; }
+.why { color: var(--ink-2); }
+.where { font-size: 13px; }
+.row { color: var(--ink-2); font-weight: 400; }
+ul.short { padding-left: 18px; } ul.short li { margin-bottom: 12px; }
+ul.plain { padding-left: 18px; font-size: 14px; } ul.plain li { margin-bottom: 6px; }
+details { border: 1px solid var(--ring); border-radius: 10px; background: var(--surface); padding: 10px 16px; margin-top: 12px; }
+summary { cursor: pointer; font-weight: 600; }
+.method li { margin-bottom: 8px; }
+.badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px;
+  border: 1px solid currentColor; }
+.b-real { color: var(--crit); } .b-partly { color: #b07800; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .b-partly { color: var(--warn); } }
+:root[data-theme="dark"] .b-partly { color: var(--warn); }
+@media (max-width: 760px) { .barcell { display: none; } }
+@media (max-width: 560px) {
+  h1 { font-size: 25px; } .answer { font-size: 17px; }
+  th, td { padding: 7px 8px; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Is the README backed by the code?</h1>
+<p class="sub">FullAgencyAutomationRUST, README.md at commit <code>b4dbc675</code>. Checked claim by claim with
+Jev (jev-1.13.0) on 2026-10-07. Jev flags read by Claude.</p>
+
+<p class="answer">The README is mostly backed by the code. Jev found the code for 1,063 of its 1,072 claims about the code. It judged 881 of those supported (83%). It flagged 45 as contradicted. I read the code for all 45: 3 are real mismatches, 12 are partly wrong, and 30 are false alarms.</p>
+<p>So the README needs about 18 fixes: the 15 claims above, 2 more that my sample found, and 1 more moved file path. Most fixes are small: a file that became a folder, a list that leaves out one case, or an old number. Jev could not settle 137 claims. For 9 claims, the search did not find the right code. In a sample of 20 claims that Jev called supported, I found 2 wrong ones, so expect a few more wrong claims among the 881.</p>
+
+<div class="tiles">
+<div class="tile"><div class="v">1,072</div><div class="l">claims about the code</div></div>
+<div class="tile"><div class="v">83%</div><div class="l"><span class="dot" style="background:var(--good)"></span>supported, of 1,063 with code found</div></div>
+<div class="tile"><div class="v">15</div><div class="l"><span class="dot" style="background:var(--crit)"></span>confirmed wrong (3 real, 12 partly)</div></div>
+<div class="tile"><div class="v">5</div><div class="l">file paths that moved</div></div>
+<div class="tile"><div class="v">137</div><div class="l"><span class="dot" style="background:var(--warn)"></span>unclear</div></div>
+<div class="tile"><div class="v">$1.12</div><div class="l">Jev cost, all runs</div></div>
+</div>
+
+<h2>The numbers</h2>
+<p>Overall: 881 supported, 137 unclear, 45 contradicted,
+9 with no code found. Of the 45 contradicted, I confirmed 3
+as real and 12 as partly wrong. The other 30 are false alarms. If you count the false
+alarms as supported, 86% of the claims with code found are supported.</p>
+<div class="legend">
+<span style="--c:var(--good)">Supported</span><span style="--c:var(--warn)">Unclear</span>
+<span style="--c:var(--crit)">Contradicted (Jev)</span><span style="--c:var(--none)">No code found</span>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th scope="col">Section</th><th scope="col">Claims</th><th scope="col">Supported</th><th scope="col">Unclear</th>
+<th scope="col">Contradicted</th><th scope="col">No code</th><th scope="col">Supported share</th><th scope="col" class="barcell">Mix</th></tr></thead>
+<tbody>
+<tr>
+<th scope="row">Opening (before the first section)</th><td>7</td><td>5</td><td>2</td>
+<td>0</td><td>0</td>
+<td class="share">71%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 5, Unclear 2, Contradicted 0, No code found 0"><span class="seg s-supported" style="flex:5" title="Supported: 5 of 7"></span><span class="seg s-unclear" style="flex:2" title="Unclear: 2 of 7"></span></div></td></tr><tr>
+<th scope="row">Run it</th><td>39</td><td>32</td><td>3</td>
+<td>3 <span class="realn">(1 real)</span></td><td>1</td>
+<td class="share">84%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 32, Unclear 3, Contradicted 3, No code found 1"><span class="seg s-supported" style="flex:32" title="Supported: 32 of 39"></span><span class="seg s-unclear" style="flex:3" title="Unclear: 3 of 39"></span><span class="seg s-contradicted" style="flex:3" title="Contradicted: 3 of 39"></span><span class="seg s-no" style="flex:1" title="No code found: 1 of 39"></span></div></td></tr><tr>
+<th scope="row">The three crates</th><td>6</td><td>4</td><td>2</td>
+<td>0</td><td>0</td>
+<td class="share">67%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 4, Unclear 2, Contradicted 0, No code found 0"><span class="seg s-supported" style="flex:4" title="Supported: 4 of 6"></span><span class="seg s-unclear" style="flex:2" title="Unclear: 2 of 6"></span></div></td></tr><tr>
+<th scope="row">How a move flows through the gate</th><td>12</td><td>9</td><td>1</td>
+<td>2 <span class="realn">(1 real)</span></td><td>0</td>
+<td class="share">75%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 9, Unclear 1, Contradicted 2, No code found 0"><span class="seg s-supported" style="flex:9" title="Supported: 9 of 12"></span><span class="seg s-unclear" style="flex:1" title="Unclear: 1 of 12"></span><span class="seg s-contradicted" style="flex:2" title="Contradicted: 2 of 12"></span></div></td></tr><tr>
+<th scope="row">Practice mode</th><td>32</td><td>32</td><td>0</td>
+<td>0</td><td>0</td>
+<td class="share">100%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 32, Unclear 0, Contradicted 0, No code found 0"><span class="seg s-supported" style="flex:32" title="Supported: 32 of 32"></span></div></td></tr><tr>
+<th scope="row">The Run page</th><td>132</td><td>115</td><td>12</td>
+<td>5</td><td>0</td>
+<td class="share">87%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 115, Unclear 12, Contradicted 5, No code found 0"><span class="seg s-supported" style="flex:115" title="Supported: 115 of 132"></span><span class="seg s-unclear" style="flex:12" title="Unclear: 12 of 132"></span><span class="seg s-contradicted" style="flex:5" title="Contradicted: 5 of 132"></span></div></td></tr><tr>
+<th scope="row">Conductor health</th><td>85</td><td>74</td><td>8</td>
+<td>2</td><td>1</td>
+<td class="share">88%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 74, Unclear 8, Contradicted 2, No code found 1"><span class="seg s-supported" style="flex:74" title="Supported: 74 of 85"></span><span class="seg s-unclear" style="flex:8" title="Unclear: 8 of 85"></span><span class="seg s-contradicted" style="flex:2" title="Contradicted: 2 of 85"></span><span class="seg s-no" style="flex:1" title="No code found: 1 of 85"></span></div></td></tr><tr>
+<th scope="row">Commands</th><td>223</td><td>199</td><td>16</td>
+<td>4 <span class="realn">(1 real)</span></td><td>4</td>
+<td class="share">91%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 199, Unclear 16, Contradicted 4, No code found 4"><span class="seg s-supported" style="flex:199" title="Supported: 199 of 223"></span><span class="seg s-unclear" style="flex:16" title="Unclear: 16 of 223"></span><span class="seg s-contradicted" style="flex:4" title="Contradicted: 4 of 223"></span><span class="seg s-no" style="flex:4" title="No code found: 4 of 223"></span></div></td></tr><tr>
+<th scope="row">Verifiers are trees</th><td>36</td><td>27</td><td>7</td>
+<td>2 <span class="realn">(1 real)</span></td><td>0</td>
+<td class="share">75%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 27, Unclear 7, Contradicted 2, No code found 0"><span class="seg s-supported" style="flex:27" title="Supported: 27 of 36"></span><span class="seg s-unclear" style="flex:7" title="Unclear: 7 of 36"></span><span class="seg s-contradicted" style="flex:2" title="Contradicted: 2 of 36"></span></div></td></tr><tr>
+<th scope="row">Messages to Will</th><td>138</td><td>116</td><td>19</td>
+<td>3 <span class="realn">(2 real)</span></td><td>0</td>
+<td class="share">84%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 116, Unclear 19, Contradicted 3, No code found 0"><span class="seg s-supported" style="flex:116" title="Supported: 116 of 138"></span><span class="seg s-unclear" style="flex:19" title="Unclear: 19 of 138"></span><span class="seg s-contradicted" style="flex:3" title="Contradicted: 3 of 138"></span></div></td></tr><tr>
+<th scope="row">The manager verifier</th><td>51</td><td>33</td><td>15</td>
+<td>3 <span class="realn">(2 real)</span></td><td>0</td>
+<td class="share">65%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 33, Unclear 15, Contradicted 3, No code found 0"><span class="seg s-supported" style="flex:33" title="Supported: 33 of 51"></span><span class="seg s-unclear" style="flex:15" title="Unclear: 15 of 51"></span><span class="seg s-contradicted" style="flex:3" title="Contradicted: 3 of 51"></span></div></td></tr><tr>
+<th scope="row">The client-report verifier</th><td>42</td><td>33</td><td>4</td>
+<td>3 <span class="realn">(1 real)</span></td><td>2</td>
+<td class="share">82%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 33, Unclear 4, Contradicted 3, No code found 2"><span class="seg s-supported" style="flex:33" title="Supported: 33 of 42"></span><span class="seg s-unclear" style="flex:4" title="Unclear: 4 of 42"></span><span class="seg s-contradicted" style="flex:3" title="Contradicted: 3 of 42"></span><span class="seg s-no" style="flex:2" title="No code found: 2 of 42"></span></div></td></tr><tr>
+<th scope="row">The CRM verifier</th><td>55</td><td>46</td><td>7</td>
+<td>2 <span class="realn">(1 real)</span></td><td>0</td>
+<td class="share">84%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 46, Unclear 7, Contradicted 2, No code found 0"><span class="seg s-supported" style="flex:46" title="Supported: 46 of 55"></span><span class="seg s-unclear" style="flex:7" title="Unclear: 7 of 55"></span><span class="seg s-contradicted" style="flex:2" title="Contradicted: 2 of 55"></span></div></td></tr><tr>
+<th scope="row">The Payroll verifier</th><td>27</td><td>19</td><td>8</td>
+<td>0</td><td>0</td>
+<td class="share">70%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 19, Unclear 8, Contradicted 0, No code found 0"><span class="seg s-supported" style="flex:19" title="Supported: 19 of 27"></span><span class="seg s-unclear" style="flex:8" title="Unclear: 8 of 27"></span></div></td></tr><tr>
+<th scope="row">The Money out verifier</th><td>43</td><td>28</td><td>9</td>
+<td>6 <span class="realn">(3 real)</span></td><td>0</td>
+<td class="share">65%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 28, Unclear 9, Contradicted 6, No code found 0"><span class="seg s-supported" style="flex:28" title="Supported: 28 of 43"></span><span class="seg s-unclear" style="flex:9" title="Unclear: 9 of 43"></span><span class="seg s-contradicted" style="flex:6" title="Contradicted: 6 of 43"></span></div></td></tr><tr>
+<th scope="row">The Meta Ads verifier</th><td>40</td><td>32</td><td>5</td>
+<td>2</td><td>1</td>
+<td class="share">82%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 32, Unclear 5, Contradicted 2, No code found 1"><span class="seg s-supported" style="flex:32" title="Supported: 32 of 40"></span><span class="seg s-unclear" style="flex:5" title="Unclear: 5 of 40"></span><span class="seg s-contradicted" style="flex:2" title="Contradicted: 2 of 40"></span><span class="seg s-no" style="flex:1" title="No code found: 1 of 40"></span></div></td></tr><tr>
+<th scope="row">The Merchant Center verifier</th><td>47</td><td>38</td><td>7</td>
+<td>2</td><td>0</td>
+<td class="share">81%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 38, Unclear 7, Contradicted 2, No code found 0"><span class="seg s-supported" style="flex:38" title="Supported: 38 of 47"></span><span class="seg s-unclear" style="flex:7" title="Unclear: 7 of 47"></span><span class="seg s-contradicted" style="flex:2" title="Contradicted: 2 of 47"></span></div></td></tr><tr>
+<th scope="row">The Conversion tracking verifier</th><td>20</td><td>15</td><td>3</td>
+<td>2</td><td>0</td>
+<td class="share">75%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 15, Unclear 3, Contradicted 2, No code found 0"><span class="seg s-supported" style="flex:15" title="Supported: 15 of 20"></span><span class="seg s-unclear" style="flex:3" title="Unclear: 3 of 20"></span><span class="seg s-contradicted" style="flex:2" title="Contradicted: 2 of 20"></span></div></td></tr><tr>
+<th scope="row">Self-contained</th><td>22</td><td>14</td><td>7</td>
+<td>1 <span class="realn">(1 real)</span></td><td>0</td>
+<td class="share">64%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 14, Unclear 7, Contradicted 1, No code found 0"><span class="seg s-supported" style="flex:14" title="Supported: 14 of 22"></span><span class="seg s-unclear" style="flex:7" title="Unclear: 7 of 22"></span><span class="seg s-contradicted" style="flex:1" title="Contradicted: 1 of 22"></span></div></td></tr><tr>
+<th scope="row">Where things are</th><td>15</td><td>10</td><td>2</td>
+<td>3 <span class="realn">(1 real)</span></td><td>0</td>
+<td class="share">67%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 10, Unclear 2, Contradicted 3, No code found 0"><span class="seg s-supported" style="flex:10" title="Supported: 10 of 15"></span><span class="seg s-unclear" style="flex:2" title="Unclear: 2 of 15"></span><span class="seg s-contradicted" style="flex:3" title="Contradicted: 3 of 15"></span></div></td></tr>
+<tr class="total"><th scope="row">All sections</th><td>1072</td><td>881</td><td>137</td>
+<td>45 <span class="realn">(15 real)</span></td><td>9</td>
+<td class="share">83%</td><td class="barcell"><div class="bar" role="img" aria-label="Supported 881, Unclear 137, Contradicted 45, No code found 9"><span class="seg s-supported" style="flex:881" title="Supported: 881 of 1072"></span><span class="seg s-unclear" style="flex:137" title="Unclear: 137 of 1072"></span><span class="seg s-contradicted" style="flex:45" title="Contradicted: 45 of 1072"></span><span class="seg s-no" style="flex:9" title="No code found: 9 of 1072"></span></div></td></tr>
+</tbody></table></div>
+<p class="meta">"Supported share" is supported claims divided by claims with code found. "Real" counts the flags I
+confirmed as real or partly wrong.</p>
+
+<h2>Real mismatches (3)</h2>
+<p>The README says one thing; the code does another. I read the code for each one.</p>
+<ul class="findings"><li class="finding real">
+<p class="claim">“Add a real case for it, with its fixture in <code>verify/tests/inbox_real_cases.rs</code>.”</p>
+<p class="meta">Verifiers are trees · README line 479</p>
+<p class="instead"><b>The code instead:</b> fixtures live in verify/tests/inbox_real_cases/fixtures.rs</p><p class="why">The file verify/tests/inbox_real_cases.rs does not exist. The fixtures are in a folder, in verify/tests/inbox_real_cases/fixtures.rs. A missing fixture does fail a test.</p>
+<p class="where"><code>verify/tests/inbox_real_cases/fixtures.rs:10</code> <code>verify/tests/inbox_real_cases/cases.rs:12</code></p>
+<p class="jev">Jev: <span class="nums">about 0.41 · supported 0.10 · contradicted 0.76</span></p></li>
+<li class="finding real">
+<p class="claim">“Real cases: <code>verify/tests/money_out_cases.rs</code>.”</p>
+<p class="meta">The Money out verifier · README line 948</p>
+<p class="instead"><b>The code instead:</b> cases are in the folder verify/tests/money_out_cases/ (main.rs)</p><p class="why">The file verify/tests/money_out_cases.rs does not exist. The real cases are in the folder verify/tests/money_out_cases/, in main.rs and seven more files.</p>
+<p class="where"><code>verify/tests/all.rs:63</code> <code>verify/tests/money_out_cases/main.rs:1</code></p>
+<p class="jev">Jev: <span class="nums">about 0.51 · supported 0.15 · contradicted 0.65</span></p></li>
+<li class="finding real">
+<p class="claim">“<span class="row">Turn on › </span>The event watcher and the watchdog are not loaded.”</p>
+<p class="meta">Run it · README line 23</p>
+<p class="instead"><b>The code instead:</b> ops/turn-on-core.sh loads tick, watchdog, page, status, and events</p><p class="why">The turn-on script loads the watchdog and the event watcher with the tick, the card page, and the status page. The same README row says so too. Only a hand unload keeps them off.</p>
+<p class="where"><code>ops/turn-on-core.sh:32</code></p>
+<p class="jev">Jev: <span class="nums">about 0.89 · supported 0.32 · contradicted 0.57</span></p></li></ul>
+
+<h3>Partly wrong (12)</h3>
+<p>One part of the claim is right, and one part is not what the code does.</p>
+<ul class="findings"><li class="finding partly">
+<p class="claim">“Code: <code>verify/src/manager/</code> (<code>facts.rs</code> the shared facts, <code>gather.rs</code> every source read, <code>email.rs</code> and <code>voice.rs</code> the email checks on the shared voice rules in <code>verify/src/voice/</code>, <code>accounts.rs</code> the account checks, <code>clock.rs</code>, <code>backtest/</code>), <code>conductor/src/manager.rs</code> (the gates).”</p>
+<p class="meta">The manager verifier · README line 723</p>
+<p class="instead"><b>The code instead:</b> gather/, email/, accounts/, and conductor/src/manager/ are folders</p><p class="why">The modules exist with the roles named. But gather, email, and accounts are folders, not single .rs files, and conductor/src/manager is a folder too, not manager.rs.</p>
+<p class="where"><code>verify/src/manager/mod.rs:21</code> <code>verify/src/manager/mod.rs:24</code> <code>conductor/src/manager/mod.rs:16</code></p>
+<p class="jev">Jev: <span class="nums">about 0.79 · supported 0.14 · contradicted 0.86</span></p></li>
+<li class="finding partly">
+<p class="claim">“Tools on PATH: <code>git</code>, <code>tar</code>, <code>cargo</code>, <code>ps</code>, <code>df</code> (conductor health&#x27;s free space), <code>lsof</code>, <code>id</code>, <code>launchctl</code>, <code>keymaster</code>, <code>wa</code> (Will&#x27;s own CLI), <code>fly</code> (the read-only Upwork token copy), and <code>pdftotext</code> (the text of a team invoice PDF, for the Money out verifier).”</p>
+<p class="meta">Self-contained · README line 1120</p>
+<p class="instead"><b>The code instead:</b> also allows and runs /bin/kill</p><p class="why">Every tool listed is on the code&#x27;s allowed list, with the same reason. But the code also runs /bin/kill, which the README list leaves out.</p>
+<p class="where"><code>conductor/tests/self_contained.rs:174</code> <code>conductor/src/background.rs:260</code></p>
+<p class="jev">Jev: <span class="nums">about 0.90 · supported 0.42 · contradicted 0.76</span></p></li>
+<li class="finding partly">
+<p class="claim">“The tree <code>verify/trees/crm.toml</code> (Will&#x27;s draft of 2026-10-02, built 2026-10-03) checks two things.”</p>
+<p class="meta">The CRM verifier · README line 781</p>
+<p class="instead"><b>The code instead:</b> a third section, Setup, checks notebook setup</p><p class="why">The dates and the two checks match the tree&#x27;s header. But the tree also has a third section, Setup, which checks each client&#x27;s roster entry, folder, and accounts.</p>
+<p class="where"><code>verify/trees/crm.toml:3</code> <code>verify/trees/crm.toml:9</code> <code>verify/trees/crm.toml:757</code></p>
+<p class="jev">Jev: <span class="nums">about 0.86 · supported 0.25 · contradicted 0.75</span></p></li>
+<li class="finding partly">
+<p class="claim">“It is also one when its subject has a report word and its body states 2 or more results.”</p>
+<p class="meta">The client-report verifier · README line 739</p>
+<p class="instead"><b>The code instead:</b> a reply of type update or answer, with the report word only in the thread&#x27;s subject, goes to Jev; a subject that starts with &quot;update&quot; does not count</p><p class="why">The main rule holds: a report word in the subject plus 2 or more results makes a report. But the code has exceptions that the README does not give.</p>
+<p class="where"><code>verify/src/report/checks/sort.rs:26</code> <code>verify/src/report/checks/sort.rs:32</code> <code>verify/src/report/checks/sort.rs:36</code></p>
+<p class="jev">Jev: <span class="nums">about 0.89 · supported 0.37 · contradicted 0.72</span></p></li>
+<li class="finding partly">
+<p class="claim">“Each monthly bill on the list is paid near its day; the card statement is paid in full on the 1st; a vendor&#x27;s overdue notice is followed by a payment; each bill is paid once.”</p>
+<p class="meta">The Money out verifier · README line 924</p>
+<p class="instead"><b>The code instead:</b> the statement may be paid from 3 days before the 1st to the 5th</p><p class="why">Bill timing, overdue notices, and paid-once match. The card statement check takes a full payment from 3 days before the 1st up to the 5th.</p>
+<p class="where"><code>verify/src/money_out/bills.rs:116</code> <code>verify/src/money_out/bills.rs:124</code></p>
+<p class="jev">Jev: <span class="nums">about 0.67 · supported 0.48 · contradicted 0.70</span></p></li>
+<li class="finding partly">
+<p class="claim">“So a change links 5 test programs instead of 56, and the shared helpers compile once.”</p>
+<p class="meta">Commands · README line 435</p>
+<p class="instead"><b>The code instead:</b> the 56 is out of date: 91 test files today</p><p class="why">The code has one test program per crate folder (<code>all.rs</code>), as the README says. The 56 is the old count; the two test folders now hold 91 top-level files.</p>
+<p class="where"><code>conductor/Cargo.toml:60</code> <code>verify/Cargo.toml:38</code> <code>conductor/tests/all.rs:11</code></p>
+<p class="jev">Jev: <span class="nums">about 0.89 · supported 0.39 · contradicted 0.64</span></p></li>
+<li class="finding partly">
+<p class="claim">“<span class="row"><code>waive</code> › </span>every <code>waive_proposal</code> a manager thread reports”</p>
+<p class="meta">The manager verifier · README line 679</p>
+<p class="instead"><b>The code instead:</b> skips the waiver gate for manager-clock items</p><p class="why">The waiver gate runs on a manager thread&#x27;s waive_proposal for its own items. It does not run for manager-clock items, which the same thread also reports on.</p>
+<p class="where"><code>conductor/src/manager/mod.rs:68</code> <code>conductor/src/commands/precheck.rs:181</code></p>
+<p class="jev">Jev: <span class="nums">about 0.85 · supported 0.38 · contradicted 0.61</span></p></li>
+<li class="finding partly">
+<p class="claim">“The gate checks the move (MG2 to MG9, MG15).”</p>
+<p class="meta">How a move flows through the gate · README line 60</p>
+<p class="instead"><b>The code instead:</b> also checks MG11 (a promise&#x27;s own due time) in every move</p><p class="why">The move check does run MG2 to MG9 and MG15. It also runs MG11, a code check on a move&#x27;s own due time, which the README list leaves out.</p>
+<p class="where"><code>conductor/src/ledger/gate.rs:226</code> <code>conductor/src/ledger/gate.rs:232</code></p>
+<p class="jev">Jev: <span class="nums">about 0.94 · supported 0.50 · contradicted 0.59</span></p></li>
+<li class="finding partly">
+<p class="claim">“Every prospect email that waits on us, and email from a client with no manager thread (the registry says which clients have one), goes to Will as a card within the same 5 minutes as manager delivery: the event watcher finds it with the inbox tree&#x27;s sort (the one client identification), and the router does the same for older inbox items.”</p>
+<p class="meta">Messages to Will · README line 628</p>
+<p class="instead"><b>The code instead:</b> skips copied-only mail Jev says Will need not see</p><p class="why">The watcher and the router make these cards with the inbox sort. But when Will is only copied and Jev says he is not needed, no card comes.</p>
+<p class="where"><code>verify/src/inbox/events.rs:150</code> <code>verify/src/inbox/events.rs:156</code> <code>conductor/src/route/sort.rs:134</code></p>
+<p class="jev">Jev: <span class="nums">about 0.93 · supported 0.46 · contradicted 0.53</span></p></li>
+<li class="finding partly">
+<p class="claim">“Each ad charge has a named ad account and is DWA&#x27;s own; an ad platform&#x27;s failed charge tries and suspend notices are FAILs.”</p>
+<p class="meta">The Money out verifier · README line 924</p>
+<p class="instead"><b>The code instead:</b> a suspend notice that a payment followed passes</p><p class="why">Each ad charge needs a named ad account, and a failed charge try always FAILs. But a suspend notice FAILs only when no payment to the platform came after it.</p>
+<p class="where"><code>verify/src/money_out/ads.rs:99</code> <code>verify/src/money_out/ads.rs:128</code> <code>verify/src/money_out/ads.rs:142</code></p>
+<p class="jev">Jev: <span class="nums">about 0.82 · supported 0.29 · contradicted 0.53</span></p></li>
+<li class="finding partly">
+<p class="claim">“<span class="row">Messages to Will › </span><code>conductor/src/cards.rs</code> (cards, pump, answers, fingerprints), <code>conductor/src/page.rs</code> (the page server), <code>conductor/src/ledger/cards.rs</code> (the queue), <code>verify/src/will_messages/</code> (the card, its checks, the backtest)”</p>
+<p class="meta">Where things are · README line 1133</p>
+<p class="instead"><b>The code instead:</b> cards code is in conductor/src/cards/ (mod.rs, pump.rs, answer.rs)</p><p class="why">page.rs, ledger/cards.rs, and will_messages/ exist and do these jobs. But conductor/src/cards.rs does not exist. The cards code is a folder, conductor/src/cards/.</p>
+<p class="where"><code>conductor/src/cards/mod.rs:1</code> <code>conductor/src/cards/mod.rs:35</code></p>
+<p class="jev">Jev: <span class="nums">about 0.79 · supported 0.39 · contradicted 0.53</span></p></li>
+<li class="finding partly">
+<p class="claim">“Will&#x27;s answers are never lost. One function says who takes Will&#x27;s answer about an item (<code>route::answer_taker</code>): the client&#x27;s manager thread, the verifier&#x27;s own thread, a fix agent, or nobody.”</p>
+<p class="meta">Messages to Will · README line 554</p>
+<p class="instead"><b>The code instead:</b> a conductor health item goes to the Verifier gate thread</p><p class="why">answer_taker gives the four takers the README names. It also has a fifth case: Will&#x27;s answer about a conductor health item goes to the Verifier gate thread.</p>
+<p class="where"><code>conductor/src/route/mod.rs:117</code> <code>conductor/src/route/mod.rs:123</code></p>
+<p class="jev">Jev: <span class="nums">about 0.96 · supported 0.44 · contradicted 0.51</span></p></li></ul>
+
+<h3>Found in my sample of "supported" claims (2)</h3>
+<p>Jev said "supported" for these, but the code does something else. I found them in a random sample of 20.</p>
+<ul class="findings"><li class="finding real"><p class="claim">“Cause class. Each FAIL is one of two kinds (Will, 2026-10-03: &quot;fix the issue at hand and then fix the verifiers as well&quot;):”</p>
+<p class="meta">Conductor health · README line 285</p>
+<p class="why">The code has four cause classes, not two: a (the machine broke), b (the check was wrong), b-page (a page bug), and c (an outside limit, such as Claude usage).</p><p class="where"><code>conductor/src/health/record.rs:62-79</code> <code>conductor/src/health/policy.rs:5-8</code> <code>conductor/src/health/policy.rs:351-355</code></p>
+<p class="jev">Jev: <span class="nums">about 0.92 · supported 0.63 · contradicted 0.17</span></p></li>
+<li class="finding real"><p class="claim">“A reply card from the AR verifier names the money matter, never the email thread&#x27;s subject: &quot;Remind Colin about the unpaid $2,250 payment link?&quot;, &quot;Answer the billing request from Vostok Europe about ...?&quot;”</p>
+<p class="meta">Messages to Will · README line 505</p>
+<p class="why">The titles of owed money and AR7 match the examples. But the title of any other AR reply (a promise, an ask) uses the email&#x27;s subject, so &quot;never&quot; is not true.</p><p class="where"><code>conductor/src/cards/titles.rs:343-380</code> <code>conductor/tests/card_titles_cases.rs:358-410</code></p>
+<p class="jev">Jev: <span class="nums">about 0.92 · supported 0.84 · contradicted 0.20</span></p></li></ul>
+
+<h3>README paths that moved (5)</h3>
+<p>A code check, not Jev. The README names these files, but the commit has a folder of the same name instead.</p>
+<div class="tablewrap"><table>
+<thead><tr><th scope="col">README names</th><th scope="col">Where</th><th scope="col">The repo has</th></tr></thead>
+<tbody><tr><td><code>verify/src/inbox/checks.rs</code></td><td>Verifiers are trees, line 477</td><td>A folder: <code>verify/src/inbox/checks/</code></td></tr>
+<tr><td><code>verify/tests/inbox_real_cases.rs</code></td><td>Verifiers are trees, line 479</td><td>A folder: <code>verify/tests/inbox_real_cases/</code></td></tr>
+<tr><td><code>conductor/src/manager.rs</code></td><td>The manager verifier, line 723</td><td>A folder: <code>conductor/src/manager/</code></td></tr>
+<tr><td><code>verify/tests/money_out_cases.rs</code></td><td>The Money out verifier, line 948</td><td>A folder: <code>verify/tests/money_out_cases/</code></td></tr>
+<tr><td><code>conductor/src/cards.rs</code></td><td>Where things are, line 1133</td><td>A folder: <code>conductor/src/cards/</code></td></tr></tbody></table></div>
+
+<h2>Jev's false alarms (30)</h2>
+<p>Jev said "contradicted", but the code does what the README says.</p>
+<ul class="short"><li><p class="claim">“<span class="row">Counted right › </span>The first question only”</p><p class="why">Only the first Counted right group is built. It holds the question &#x27;Is tracking set up?&#x27;. The other Counted right goals sit in a group marked not built.</p>
+<p class="where"><code>verify/trees/conversion-tracking.toml:185</code> <code>verify/trees/conversion-tracking.toml:198</code> <code>verify/src/google_ads/mod_test.rs:31</code> <span class="jev">Jev contradicted 0.89</span></p></li>
+<li><p class="claim">“Every claim agrees (<code>claims-agree</code>, at the draft and at the send).”</p><p class="why">The tree runs the claims-agree goal and its question on both the draft and the send phase. At send, the code reads the outgoing email text.</p>
+<p class="where"><code>verify/trees/manager.toml:307</code> <code>verify/trees/manager.toml:321</code> <code>verify/src/manager/email/helpers.rs:46</code> <span class="jev">Jev contradicted 0.87</span></p></li>
+<li><p class="claim">“Safety. <code>POST /api/run</code> has the same guards as <code>/api/answer</code> (this machine, the page&#x27;s own header and origin).”</p><p class="why">Both routes pass the same check first: only this machine, the page&#x27;s own host, and for a POST the page header and origin. The route /api/answer exists.</p>
+<p class="where"><code>conductor/src/page.rs:266</code> <code>conductor/src/page.rs:291</code> <code>conductor/src/page.rs:324</code> <span class="jev">Jev contradicted 0.83</span></p></li>
+<li><p class="claim">“The card has an <code>owner</code> field for the day some prospects go to Tristan.”</p><p class="why">The card has an owner field. Its comment says: today always Will, later some prospects go to Tristan. Mail cards set it to will.</p>
+<p class="where"><code>verify/src/will_messages/card.rs:280</code> <code>conductor/src/cards/mail.rs:192</code> <span class="jev">Jev contradicted 0.81</span></p></li>
+<li><p class="claim">“The deploy lock. A deploy swaps the live copy&#x27;s files first and its binaries later.”</p><p class="why">The deploy script checks out the new commit first (the files), then builds it (the binaries). That is the order the README states.</p>
+<p class="where"><code>ops/deploy-live.sh:157</code> <code>ops/deploy-live.sh:159</code> <span class="jev">Jev contradicted 0.77</span></p></li>
+<li><p class="claim">“A refusal changes nothing.”</p><p class="why">On a refusal, the code returns before it writes the item, so the move changes nothing. It only logs the refusal and handles it by who asked, as step 5 says.</p>
+<p class="where"><code>conductor/src/ledger/apply.rs:77</code> <code>conductor/src/ledger/apply.rs:2</code> <code>conductor/src/ledger/refusals.rs:55</code> <span class="jev">Jev contradicted 0.76</span></p></li>
+<li><p class="claim">“The key is in keymaster (<code>FLY_TESTER_PAGE_KEY</code>).”</p><p class="why">The Fly app reads the key from the Fly secret TESTER_PAGE_KEY. The repo never names the keymaster copy in code. This agrees with the rule to keep the key out of the repo.</p>
+<p class="where"><code>ops/fly/tester-page/src/main.rs:39</code> <code>ops/fly/tester-page/README.md:14</code> <span class="jev">Jev contradicted 0.75</span></p></li>
+<li><p class="claim">“A cause fix is a request item for the Verifier gate thread (<code>ask:health:&lt;goal&gt;:&lt;cause&gt;</code>).”</p><p class="why">The code files an ASK item for the verifier-gate thread. Its key is ask:health: plus the cause, and the cause is goal:cause. So the key matches.</p>
+<p class="where"><code>conductor/src/health/cause.rs:83</code> <code>conductor/src/health/policy.rs:143</code> <code>conductor/src/health/cause.rs:102</code> <span class="jev">Jev contradicted 0.75</span></p></li>
+<li><p class="claim">“A tree with parts loads only from its file.”</p><p class="why">A load from text refuses a tree that has an include list. Only a load from the file adds the parts.</p>
+<p class="where"><code>verify/src/tree/load.rs:27</code> <code>verify/src/tree/load.rs:30</code> <code>verify/src/tree/load.rs:20</code> <span class="jev">Jev contradicted 0.73</span></p></li>
+<li><p class="claim">“Nothing runs for it.”</p><p class="why">The code runs only the goals of built groups. Groups marked built = false show on the page and never run, as the README says.</p>
+<p class="where"><code>verify/src/tree/mod.rs:351</code> <code>verify/trees/conversion-tracking.toml:18</code> <span class="jev">Jev contradicted 0.72</span></p></li>
+<li><p class="claim">“Both only read, and neither has a clock.”</p><p class="why">The meta-ads and merchant-center registry entries have no clock, so the tick never runs them. Both read through GET-only readers and never change an account.</p>
+<p class="where"><code>registry.toml:189</code> <code>registry.toml:207</code> <span class="jev">Jev contradicted 0.71</span></p></li>
+<li><p class="claim">“<span class="row">pages-read-well › </span>Each page Will opens (the card page with its card on screen, the Practice page, the status page, the Run page) draws at 1100 and 390 px with no word broken over lines, nothing off the page, and no squeezed table cell.”</p><p class="why">The code draws the card, Practice, status, and Run pages at 1100 and 390 px. It finds split words, wide content, and squeezed cells. Only the tree text leaves out the Run page.</p>
+<p class="where"><code>conductor/src/health/pages.rs:187</code> <code>conductor/src/health/pages.rs:199</code> <code>verify/src/will_messages/render.rs:36</code> <span class="jev">Jev contradicted 0.70</span></p></li>
+<li><p class="claim">“Build once: <code>cargo build --release</code>.”</p><p class="why">The workspace has three crates. A plain cargo build --release builds them all, and the deploy uses the same command for two of them.</p>
+<p class="where"><code>Cargo.toml:3</code> <code>ops/deploy-live.sh:71</code> <span class="jev">Jev contradicted 0.70</span></p></li>
+<li><p class="claim">“<span class="row"><code>conductor events [--no-poll]</code> › </span>The event watcher: client mail, meetings, and texts reach the manager thread within 5 minutes.”</p><p class="why">Launchd runs the watcher every 60 seconds. Each client event is due in 5 minutes and goes to the client&#x27;s manager thread.</p>
+<p class="where"><code>conductor/src/events.rs:1</code> <code>ops/launchd/com.digitalwill.fullagency.events.plist:34</code> <code>conductor/src/ledger/client_events.rs:18</code> <span class="jev">Jev contradicted 0.70</span></p></li>
+<li><p class="claim">“What it checks. Each bank payment, card charge, and refund in the last 100 days is sorted into one kind (own accounts, refund, team pay, ad platform, subscription, bill, one-off purchase) and its payee must be known.”</p><p class="why">By default the code checks 100 days and sorts each payment into the seven kinds, in order. A goal sends a payment with no known kind to Will.</p>
+<p class="where"><code>verify/src/money_out/mod.rs:122</code> <code>verify/src/money_out/items.rs:232</code> <code>verify/trees/money-out.toml:398</code> <span class="jev">Jev contradicted 0.66</span></p></li>
+<li><p class="claim">“Custom labels, products that spend with no sale, and the titles shown most (Jev, report only) close the run.”</p><p class="why">The last feed checks are custom labels, spend with no sales, and the top titles. Jev reads the titles and only reports until Will approves its line.</p>
+<p class="where"><code>verify/trees/merchant-center.toml:890</code> <code>verify/trees/merchant-center.toml:911</code> <code>verify/trees/merchant-center.toml:940</code> <span class="jev">Jev contradicted 0.65</span></p></li>
+<li><p class="claim">“<span class="row">Build › </span><code>cargo build --release</code> (binaries in <code>target/release/</code>: <code>conductor</code>, <code>verify</code>, <code>guard</code>, <code>stop-hook</code>)”</p><p class="why">The conductor crate defines exactly four programs: conductor, verify, guard, and stop-hook. A release build puts them in target/release.</p>
+<p class="where"><code>conductor/Cargo.toml:12</code> <code>conductor/Cargo.toml:27</code> <span class="jev">Jev contradicted 0.64</span></p></li>
+<li><p class="claim">“An email is a report when its type is report or a deck comes with it.”</p><p class="why">The code says an email is a report when its type is report, or when a deck comes with it.</p>
+<p class="where"><code>verify/src/report/checks/sort.rs:19</code> <code>verify/src/report/checks/sort.rs:22</code> <span class="jev">Jev contradicted 0.63</span></p></li>
+<li><p class="claim">“<span class="row">History of the retired systems (read-only, imported once on 2026-10-02) › </span><code>state/history/</code>: <code>old-conductor-ledger.db</code> and <code>old-conductor-sends.jsonl</code> (the Python conductor), <code>inbox-python-janitor.jsonl</code> (the Python inbox janitor), <code>google-ads-validator-clients/</code> (the TypeScript validator&#x27;s change files and snapshots).”</p><p class="why">The code reads all four from state/history: the old ledger, the old sends, the janitor journal, and the TypeScript validator&#x27;s client folders.</p>
+<p class="where"><code>conductor/src/config.rs:106</code> <code>verify/src/inbox/mod.rs:79</code> <code>conductor/src/bin/verify.rs:344</code> <span class="jev">Jev contradicted 0.62</span></p></li>
+<li><p class="claim">“<span class="row">The search-term autopilot&#x27;s data (its nightly writes it; the conductor reads it and records Will&#x27;s rulings) › </span><code>AUTOPILOT_DATA</code>, default <code>~/Projects/client-briefs</code> (<code>conductor/src/config.rs</code>): <code>data/nightly/&lt;date&gt;/digest.json</code>, <code>data/&lt;slug&gt;/&lt;date&gt;/converting.json</code>, <code>data/&lt;slug&gt;/rulings.json</code>, <code>&lt;slug&gt;/brief.md</code>, <code>&lt;slug&gt;/decisions.md</code>, <code>roster.json</code>.”</p><p class="why">config.rs reads AUTOPILOT_DATA, with ~/Projects/client-briefs as the default. Its comment lists the same six files.</p>
+<p class="where"><code>conductor/src/config.rs:49</code> <code>conductor/src/config.rs:17</code> <span class="jev">Jev contradicted 0.61</span></p></li>
+<li><p class="claim">“The deck has one finding a slide, one chart with its range, a dated plan, and the client&#x27;s branding.”</p><p class="why">The tree has deck goals for one finding per slide, one chart with its date range, a dated plan, and the client&#x27;s branding, each with a code check.</p>
+<p class="where"><code>verify/trees/client-report.toml:337</code> <code>verify/trees/client-report.toml:363</code> <code>verify/trees/client-report.toml:398</code> <span class="jev">Jev contradicted 0.60</span></p></li>
+<li><p class="claim">“Pay is late after 1 business day; a bill 5 days after its usual day.”</p><p class="why">Pay is late after the pay day plus 1 business day. A listed bill is late after its day plus 5 days. Both are the defaults.</p>
+<p class="where"><code>verify/src/money_out/pay.rs:29</code> <code>verify/src/money_out/bills.rs:59</code> <code>verify/src/money_out/mod.rs:125</code> <span class="jev">Jev contradicted 0.60</span></p></li>
+<li><p class="claim">“Then 90 days of delivery, the activity log, the Pages, the images, videos, and lead forms.”</p><p class="why">After the ads, the code reads 90 days of delivery, the activity log, the Pages, then the images, videos, and lead forms.</p>
+<p class="where"><code>verify/src/meta_ads/mod.rs:92</code> <code>verify/src/meta_ads/read.rs:210</code> <code>verify/src/meta_ads/read.rs:220</code> <span class="jev">Jev contradicted 0.59</span></p></li>
+<li><p class="claim">“<span class="row">Tabs › </span>All, and Snoozed”</p><p class="why">Will&#x27;s page shows all eight tab kinds, then adds the Snoozed tab.</p>
+<p class="where"><code>conductor/src/run_page/page.rs:23</code> <code>conductor/src/run_page/page.rs:25</code> <code>conductor/src/run_page/mod.rs:94</code> <span class="jev">Jev contradicted 0.58</span></p></li>
+<li><p class="claim">“Also the Shopify app&#x27;s own connection and the Google Analytics link.”</p><p class="why">The tree marks both the Shopify app connection check and the GA4 link check as not built. No code does them.</p>
+<p class="where"><code>verify/trees/merchant-center.toml:545</code> <code>verify/trees/merchant-center.toml:449</code> <span class="jev">Jev contradicted 0.58</span></p></li>
+<li><p class="claim">“Each Barbara client record agrees with its payments, its billing links, and its plan.”</p><p class="why">The CRM tree checks each payment&#x27;s owner, each payment against the client&#x27;s plan, and every billing link. Only the plan&#x27;s facts source is not built, and the README says so.</p>
+<p class="where"><code>verify/src/crm/mod.rs:1</code> <code>verify/trees/crm.toml:830</code> <code>verify/trees/crm.toml:915</code> <span class="jev">Jev contradicted 0.56</span></p></li>
+<li><p class="claim">“It wants an approved token name, a read permission, and objects of the right account under one client.”</p><p class="why">The code checks for a token name on the approved list and for ads_read or ads_management. It also checks that objects belong to the account and that one client holds it.</p>
+<p class="where"><code>verify/src/meta_ads/access.rs:53</code> <code>verify/src/meta_ads/access.rs:101</code> <code>verify/src/meta_ads/access.rs:142</code> <span class="jev">Jev contradicted 0.55</span></p></li>
+<li><p class="claim">“<span class="row"><code>conductor rebuild-cards [--dry-run] [--ledger &lt;copy&gt;]</code> › </span>A card with new content is checked in the same command; an unchanged card keeps its check.”</p><p class="why">The command keeps the check of a card whose content did not change. It then runs the card check on every changed card before it ends.</p>
+<p class="where"><code>conductor/src/cards/rebuild/mod.rs:46</code> <code>conductor/src/bin/conductor/pages.rs:78</code> <span class="jev">Jev contradicted 0.52</span></p></li>
+<li><p class="claim">“Once paid, a late run passes and says how late (Will, 2026-10-07); each pay payment equals its invoice or the sheet&#x27;s amount, once per period, by an approved payee at an approved pay, and never after a stop.”</p><p class="why">A late but paid run passes and gives the days late. Each payment is checked against its invoice or sheet amount, once a period, payee and pay approvals, and stops.</p>
+<p class="where"><code>verify/src/money_out/pay.rs:162</code> <code>verify/src/money_out/pay.rs:262</code> <code>verify/src/money_out/pay.rs:447</code> <span class="jev">Jev contradicted 0.51</span></p></li>
+<li><p class="claim">“So two processes, Will&#x27;s page and the tester link, cannot both pass the busy check.”</p><p class="why">Both Will&#x27;s page and the tester link call the same start function. It takes a file lock on start.lock before the busy check, so only one passes at a time.</p>
+<p class="where"><code>conductor/src/run_page/start.rs:79</code> <code>conductor/src/run_page/http.rs:82</code> <code>conductor/src/run_page/testers.rs:189</code> <span class="jev">Jev contradicted 0.50</span></p></li></ul>
+
+<h2>No code found (9)</h2>
+<p>Jev said the code shown was not the code the claim is about. Some of these name things no code can show (test
+times); some are search misses.</p>
+<ul class="short"><li><p class="claim">“<span class="row">Test › </span><code>cargo nextest run --workspace</code> (about 26 s, against about 4 min for <code>cargo test</code>), then <code>cargo test --doc</code> for the doc examples, then <code>cargo clippy --all-targets -- -D warnings</code> and <code>cargo fmt --check</code>.”</p><p class="meta">Run it · line 20 · about 0.34</p></li>
+<li><p class="claim">“Then the item closes.”</p><p class="meta">Conductor health · line 301 · about 0.26</p></li>
+<li><p class="claim">“<span class="row"><code>conductor thread &lt;verifier&gt;</code> › </span>Open today&#x27;s thread for a verifier or client now.”</p><p class="meta">Commands · line 360 · about 0.15</p></li>
+<li><p class="claim">“<span class="row"><code>verify google-ads daily &lt;CODE&gt; [--snapshot &lt;file&gt;]</code> › </span>A keyword in a campaign that does not reach the same places is never a search&#x27;s home.”</p><p class="meta">Commands · line 415 · about 0.28</p></li>
+<li><p class="claim">“Lint: <code>cargo clippy --all-targets -- -D warnings</code>.”</p><p class="meta">Commands · line 433 · about 0.08</p></li>
+<li><p class="claim">“The full run takes about 26 s (33 s before).”</p><p class="meta">Commands · line 435 · about 0.20</p></li>
+<li><p class="claim">“./target/release/verify report-deck build spec.json --out deck.html --check                  # the deck, its link, the phone check”</p><p class="meta">The client-report verifier · line 773 · about 0.25</p></li>
+<li><p class="claim">“./target/release/verify render client-report                                                  # the tree page”</p><p class="meta">The client-report verifier · line 776 · about 0.29</p></li>
+<li><p class="claim">“Each landing page loads through the Google Ads verifier&#x27;s page loader.”</p><p class="meta">The Meta Ads verifier · line 962 · about 0.14</p></li></ul>
+
+<details><summary>Unclear claims (137)</summary>
+<p class="meta">Jev did not say clearly yes or no. These need a person or a deeper read. Numbers are Jev's.</p>
+<h4>Opening (before the first section) (2)</h4><ul class="plain"><li>“This repo is all three, in Rust, built to the conductor gate spec (<code>agent-verification-system-overview/docs/conductor-gate-spec.md</code>).” <span class="nums">about 0.69 · supported 0.28 · contradicted 0.33</span></li><li>“Only verified evidence can end it.” <span class="nums">about 0.70 · supported 0.47 · contradicted 0.17</span></li></ul>
+<h4>Run it (3)</h4><ul class="plain"><li>“<span class="row">Test › </span>Tests never reach Gmail, cmux, an ad account, or Jev.” <span class="nums">about 0.86 · supported 0.33 · contradicted 0.17</span></li><li>“So <code>ops/deploy-live.sh</code>:” <span class="nums">about 0.74 · supported 0.49 · contradicted 0.22</span></li><li>“Waits for those runs, and the verifier runs a tick started, to end (10 minutes at most, <code>DEPLOY_WAIT_LIMIT_S</code>).” <span class="nums">about 0.87 · supported 0.62 · contradicted 0.52</span></li></ul>
+<h4>The three crates (2)</h4><ul class="plain"><li>“Dependencies go one way: <code>conductor</code> → <code>verify</code> → <code>data</code>.” <span class="nums">about 0.88 · supported 0.50 · contradicted 0.36</span></li><li>“<span class="row"><code>conductor</code> › </span>The ledger with the gate inside it, deadlines, the tick, the event watcher, the watchdog, threads in cmux, the gates for sends, pushes, and verifier code, the guard and stop hooks, the status page, and the commands agents run.” <span class="nums">about 0.77 · supported 0.45 · contradicted 0.17</span></li></ul>
+<h4>How a move flows through the gate (1)</h4><ul class="plain"><li>“Only the ledger can change state.” <span class="nums">about 0.94 · supported 0.46 · contradicted 0.31</span></li></ul>
+<h4>The Run page (12)</h4><ul class="plain"><li>“The Run page is on the card page server, http://127.0.0.1:47290/run (linked from the card page header next to Practice).” <span class="nums">about 0.86 · supported 0.33 · contradicted 0.32</span></li><li>“That script publishes only with both in place.” <span class="nums">about 0.79 · supported 0.52 · contradicted 0.40</span></li><li>“A failure never fails the deploy, and an SSH session publishes nothing (no keymaster).” <span class="nums">about 0.82 · supported 0.46 · contradicted 0.41</span></li><li>“A client with no thread of its own says so.” <span class="nums">about 0.71 · supported 0.45 · contradicted 0.31</span></li><li>“The page says so while it runs, and the run is its own process, so the page stays usable.” <span class="nums">about 0.87 · supported 0.40 · contradicted 0.26</span></li><li>“Every time on the page says its day when it is not today, Eastern (&quot;Made Oct 2 at 18:05&quot;, &quot;Put behind the other cards until Oct 4 at 09:00&quot;); a time today stays short (&quot;Made at 18:05&quot;).” <span class="nums">about 0.63 · supported 0.31 · contradicted 0.25</span></li><li>“Each run is logged in <code>state/run-page/runs.jsonl</code> (who, tab, clients, started, finished, goal and card counts); the latest run of each tab is <code>state/run-page/&lt;tab&gt;.json</code>.” <span class="nums">about 0.76 · supported 0.32 · contradicted 0.33</span></li><li>“The test page (<code>conductor page --test</code>) keeps these files beside its own ledger and starts no check.” <span class="nums">about 0.50 · supported 0.19 · contradicted 0.48</span></li><li>“While it is off, the tester page says the Studio has not answered, and a Refresh starts nothing.” <span class="nums">about 0.87 · supported 0.37 · contradicted 0.25</span></li><li>“The key is the Fly secret <code>TESTER_PAGE_KEY</code> (the same value as keymaster <code>FLY_TESTER_PAGE_KEY</code>).” <span class="nums">about 0.87 · supported 0.48 · contradicted 0.38</span></li><li>“<span class="row">Header › </span>Links to Will&#x27;s pages” <span class="nums">about 0.87 · supported 0.44 · contradicted 0.38</span></li><li>“Then comes the run&#x27;s &quot;started&quot; line, or a &quot;refused&quot; line with the reason.” <span class="nums">about 0.79 · supported 0.32 · contradicted 0.21</span></li></ul>
+<h4>Conductor health (8)</h4><ul class="plain"><li>“<span class="row">no-failed-cards-shown › </span>No open card is <code>fail_shown</code>.” <span class="nums">about 0.94 · supported 0.26 · contradicted 0.39</span></li><li>“<span class="row">no-failed-cards-shown › </span>The pump&#x27;s CARD gate bug holds the cause fix.” <span class="nums">about 0.86 · supported 0.38 · contradicted 0.13</span></li><li>“Fixed means moved. A heal is &quot;fixed&quot; only when its re-check shows the work moved.” <span class="nums">about 0.90 · supported 0.38 · contradicted 0.41</span></li><li>“Cap and card. At most 2 heals per fault (goal and subject) in 24 hours, 1 for a missed verifier and for the gate.” <span class="nums">about 0.93 · supported 0.60 · contradicted 0.45</span></li><li>“The card passes the will-messages check; a test pins that.” <span class="nums">about 0.56 · supported 0.18 · contradicted 0.34</span></li><li>“the card passes its check;” <span class="nums">about 0.79 · supported 0.39 · contradicted 0.26</span></li><li>“It never types into a real thread and never shows on Will&#x27;s page.” <span class="nums">about 0.94 · supported 0.49 · contradicted 0.08</span></li><li>“Will&#x27;s pages. Once an hour (<code>pages_every_min</code>), conductor health draws each page Will opens in headless Chrome at 1100 and 390 px, with the card check&#x27;s render helper (<code>verify::will_messages::render::render_page</code>).” <span class="nums">about 0.95 · supported 0.69 · contradicted 0.58</span></li></ul>
+<h4>Commands (16)</h4><ul class="plain"><li>“<span class="row"><code>verify check merchant-center --out &lt;dir&gt; [--merchant &lt;id&gt;] [--plan &lt;file&gt;] [--offers &lt;file&gt;] [--facts &lt;file&gt;] [--snapshot &lt;dir&gt;] [--no-jev]</code> › </span>Exit 1 on a FAIL, 2 when it could not run.” <span class="nums">about 0.87 · supported 0.47 · contradicted 0.16</span></li><li>“<span class="row"><code>verify check upwork --out &lt;dir&gt;</code> › </span><code>verify run upwork</code> runs it in the ledger.” <span class="nums">about 0.89 · supported 0.38 · contradicted 0.11</span></li><li>“<span class="row"><code>verify check crm --out &lt;dir&gt; [--barbara &lt;copy.db&gt;] [--ar-snapshot &lt;dir&gt;]</code> › </span>Exit 1 on a FAIL, 2 when it could not run.” <span class="nums">about 0.66 · supported 0.32 · contradicted 0.32</span></li><li>“<span class="row"><code>verify google-ads snapshot &lt;CODE&gt;</code> › </span>The live promotion assets, with their offer, dates, and each account or campaign link&#x27;s status, are in <code>assets.live_promotions</code> (absent when not read); <code>assets.promotions</code> holds only a change&#x27;s new promotions.” <span class="nums">about 0.70 · supported 0.31 · contradicted 0.44</span></li><li>“<span class="row"><code>verify google-ads daily &lt;CODE&gt; [--snapshot &lt;file&gt;]</code> › </span>It covers Search, PMax, Shopping, and Demand Gen (DG1 to DG6: an ad that can serve, the full asset set, an audience, apps excluded on Display, places and languages, no bid word in the name); other campaign types say &quot;not checked yet&quot;.” <span class="nums">about 0.93 · supported 0.55 · contradicted 0.51</span></li><li>“<span class="row"><code>verify google-ads daily &lt;CODE&gt; [--snapshot &lt;file&gt;]</code> › </span>Landing pages load in one headless Chrome kept open for the run, with its cookies in <code>state/google-ads/chrome-profile</code>, so a site&#x27;s bot check (Vercel, Cloudflare) clears once; the page&#x27;s real HTTP status decides, and a page that still does not load is &quot;could not check&quot;, never broken.” <span class="nums">about 0.83 · supported 0.49 · contradicted 0.26</span></li><li>“<span class="row"><code>verify google-ads daily &lt;CODE&gt; [--snapshot &lt;file&gt;]</code> › </span>Shared list and Google Ads Editor changes are not in the change history, so they stay untested.” <span class="nums">about 0.51 · supported 0.26 · contradicted 0.13</span></li><li>“<span class="row"><code>verify audit &lt;slug&gt; [--kind health] [--question &lt;text&gt;] [--jev] [--market] [--market-from &lt;input.json&gt;] [--writer model|code] [--html &lt;file&gt;]</code> › </span>It reads the account, the notebook, the landing pages (GET only), and with <code>--market</code> DataForSEO (capped at $1; <code>--market-from</code> reuses an earlier run&#x27;s) into <code>input.json</code>, builds one fact sheet per area, judges it (<code>--jev</code> asks Jev; its lines report only), joins and ranks the findings, and writes an HTML report whose every number is a fact reference, read back before anyone sees it.” <span class="nums">about 0.95 · supported 0.62 · contradicted 0.50</span></li><li>“<span class="row"><code>verify tool stripe-subscription &lt;sub id&gt;</code> › </span>The billing schedule names a subscription by this id, so the AR thread reads it when AR1 fails (2026-10-06).” <span class="nums">about 0.88 · supported 0.43 · contradicted 0.22</span></li><li>“<span class="row"><code>conductor rebuild-cards [--dry-run] [--ledger &lt;copy&gt;]</code> › </span>A finding that waits on Will only because no thread was found goes to its thread first.” <span class="nums">about 0.81 · supported 0.42 · contradicted 0.23</span></li><li>“<span class="row"><code>conductor changes-rebuild</code> › </span>Rebuild <code>data/account-changes.md</code> from <code>state/account_changes.jsonl</code>.” <span class="nums">about 0.89 · supported 0.46 · contradicted 0.22</span></li><li>“Tests: <code>cargo nextest run --workspace</code>.” <span class="nums">about 0.75 · supported 0.25 · contradicted 0.21</span></li><li>“After a one-line change in <code>verify</code>, the test programs build again in about 15 s (39 to 45 s before).” <span class="nums">about 0.85 · supported 0.45 · contradicted 0.40</span></li><li>“A new test file goes in <code>tests/</code> as before, with one line in that crate&#x27;s <code>tests/all.rs</code>.” <span class="nums">about 0.80 · supported 0.48 · contradicted 0.20</span></li><li>“In a test file&#x27;s own folder, write <code>crate::&lt;file&gt;::x</code> where a separate program wrote <code>crate::x</code>.” <span class="nums">about 0.52 · supported 0.24 · contradicted 0.23</span></li><li>“One file&#x27;s tests: <code>cargo nextest run -p conductor --test all practice_mode::</code>.” <span class="nums">about 0.64 · supported 0.25 · contradicted 0.41</span></li></ul>
+<h4>Verifiers are trees (7)</h4><ul class="plain"><li>“The engine reads it; the HTML page Will reads is built from it.” <span class="nums">about 0.77 · supported 0.35 · contradicted 0.13</span></li><li>“The page shows them at the top.” <span class="nums">about 0.69 · supported 0.38 · contradicted 0.25</span></li><li>“A part has no sort and includes nothing; its goals, checks, and ids are checked with the whole.” <span class="nums">about 0.66 · supported 0.35 · contradicted 0.38</span></li><li>“A Jev check needs <code>text</code>, <code>line</code>, <code>min_p</code>, <code>yes</code>, and <code>no</code>; that is all.” <span class="nums">about 0.86 · supported 0.64 · contradicted 0.53</span></li><li>“A code check also needs <code>fn</code>: write that function in the verifier&#x27;s module (<code>verify/src/inbox/checks.rs</code>) and add it to <code>fns()</code>.” <span class="nums">about 0.65 · supported 0.08 · contradicted 0.24</span></li><li>“The loader refuses a tree whose <code>fn</code> does not exist, or a check with no id.” <span class="nums">about 0.76 · supported 0.28 · contradicted 0.11</span></li><li>“The conductor runs it from the registry (<code>adapter = &quot;tree&quot;</code>, <code>tree = &quot;inbox&quot;</code>), and its event watcher finds client mail with the same sort.” <span class="nums">about 0.82 · supported 0.33 · contradicted 0.32</span></li></ul>
+<h4>Messages to Will (19)</h4><ul class="plain"><li>“A thread&#x27;s last message to Will becomes a card through the stop hook, and a thread can write a full card with <code>verify card</code>.” <span class="nums">about 0.91 · supported 0.43 · contradicted 0.15</span></li><li>“The check. The tree <code>verify/trees/will-messages.toml</code> (Will approved it line by line) runs on every card before Will sees it.” <span class="nums">about 0.89 · supported 0.37 · contradicted 0.26</span></li><li>“A failing card goes back to the current thread of its verifier, whatever session wrote it.” <span class="nums">about 0.58 · supported 0.18 · contradicted 0.27</span></li><li>“When that thread is busy, the card waits off the page for 2 minutes and tries again.” <span class="nums">about 0.79 · supported 0.27 · contradicted 0.44</span></li><li>“A failing card leaves when a newer card of the same thread already asks the same item or question.” <span class="nums">about 0.66 · supported 0.21 · contradicted 0.42</span></li><li>“(<code>cards::titles::ar_draft_title</code>; real case 2026-10-03, card 423: Will read a payment reminder titled with the thread&#x27;s subject as a manager email).” <span class="nums">about 0.88 · supported 0.40 · contradicted 0.26</span></li><li>“Delete the file to end the focus.” <span class="nums">about 0.86 · supported 0.46 · contradicted 0.15</span></li><li>“The learning questions (&quot;Afterward: ...&quot;) run after Will answers; a card he did not understand is saved as a real case, and the week&#x27;s proposed checks reach him as one grouped card.” <span class="nums">about 0.80 · supported 0.36 · contradicted 0.33</span></li><li>“A verifier&#x27;s thread takes his answer for any of its rules, with or without a playbook.” <span class="nums">about 0.95 · supported 0.51 · contradicted 0.40</span></li><li>“A hand-back by conductor health ends the agent at once, as the watchdog&#x27;s timeout does.” <span class="nums">about 0.83 · supported 0.46 · contradicted 0.31</span></li><li>“The manager proposes the fix through the gates, and practice mode holds it (<code>manager_rule</code> in <code>registry.toml</code>).” <span class="nums">about 0.91 · supported 0.45 · contradicted 0.24</span></li><li>“An item the health check or the watchdog handed back goes to its thread with one more try (<code>route::handed_back_taker</code>).” <span class="nums">about 0.53 · supported 0.44 · contradicted 0.32</span></li><li>“The watchdog only reports, and conductor health stops after two hand-backs a day per verifier and state.” <span class="nums">about 0.90 · supported 0.46 · contradicted 0.20</span></li><li>“Every open card is built again with the code that made it, so old words never stay.” <span class="nums">about 0.94 · supported 0.63 · contradicted 0.50</span></li><li>“Every thread reports at least once a day.” <span class="nums">about 0.80 · supported 0.10 · contradicted 0.12</span></li><li>“Mail for Will (Will, 2026-10-01).” <span class="nums">about 0.68 · supported 0.40 · contradicted 0.30</span></li><li>“Change and report cards for the same client, action, and account wait up to 5 minutes and merge (at most 10 rows; clients, kinds of action, and money never mix).” <span class="nums">about 0.77 · supported 0.17 · contradicted 0.44</span></li><li>“The page server (<code>conductor page</code>) listens only on 127.0.0.1, answers only requests from this machine with its own Host header, and takes clicks only from its own page.” <span class="nums">about 0.97 · supported 0.61 · contradicted 0.55</span></li><li>“./target/release/verify render will-messages           # the tree page, into the overview repo&#x27;s machine/” <span class="nums">about 0.77 · supported 0.37 · contradicted 0.43</span></li></ul>
+<h4>The manager verifier (15)</h4><ul class="plain"><li>“One subject is one client at one moment (a phase):” <span class="nums">about 0.83 · supported 0.52 · contradicted 0.41</span></li><li>“<span class="row"><code>draft</code> › </span>the report is refused with the reasons; the thread fixes the draft and reports again” <span class="nums">about 0.84 · supported 0.41 · contradicted 0.45</span></li><li>“<span class="row"><code>send</code> › </span>right before an approved manager email goes out: the links are opened again” <span class="nums">about 0.39 · supported 0.07 · contradicted 0.30</span></li><li>“<span class="row"><code>send</code> › </span>the send stops; nothing goes out” <span class="nums">about 0.79 · supported 0.40 · contradicted 0.39</span></li><li>“<span class="row"><code>change</code> › </span>the report is refused with the reasons” <span class="nums">about 0.49 · supported 0.14 · contradicted 0.36</span></li><li>“<span class="row"><code>push</code> › </span>the push stops” <span class="nums">about 0.71 · supported 0.27 · contradicted 0.33</span></li><li>“<span class="row"><code>waive</code> › </span>the report is refused with the reasons” <span class="nums">about 0.89 · supported 0.58 · contradicted 0.54</span></li><li>“<span class="row"><code>sent</code> › </span>never blocks: a miss is saved as a real case” <span class="nums">about 0.82 · supported 0.37 · contradicted 0.29</span></li><li>“Like Messages to Will, every check runs twice.” <span class="nums">about 0.72 · supported 0.46 · contradicted 0.17</span></li><li>“./target/release/verify backtest manager --max 60 --mail      # Jev lines on past drafts with known outcomes (read-only)” <span class="nums">about 0.72 · supported 0.35 · contradicted 0.32</span></li><li>“./target/release/verify backtest manager --only claim-agrees,claim-sourced --open --mail --meetings   # open drafts, now” <span class="nums">about 0.79 · supported 0.49 · contradicted 0.37</span></li><li>“./target/release/verify render manager                        # the tree page, into the overview repo&#x27;s machine/” <span class="nums">about 0.76 · supported 0.41 · contradicted 0.40</span></li><li>“Code picks each sentence with a number, a date, or a cap, budget, spend, or lead word.” <span class="nums">about 0.89 · supported 0.47 · contradicted 0.42</span></li><li>“Each claim&#x27;s ask carries only its own passages, under 10 KB (the budget is 72 KB).” <span class="nums">about 0.93 · supported 0.51 · contradicted 0.49</span></li><li>“A tracked promise the reader reads again and no longer calls one closes; a waiver proposal never holds an item whose check passes.” <span class="nums">about 0.89 · supported 0.55 · contradicted 0.42</span></li></ul>
+<h4>The client-report verifier (4)</h4><ul class="plain"><li>“A WARNING is kept on the proposal (<code>report_check</code>).” <span class="nums">about 0.89 · supported 0.45 · contradicted 0.47</span></li><li>“The goals.” <span class="nums">about 0.73 · supported 0.49 · contradicted 0.17</span></li><li>“It goes to the client&#x27;s report contacts and no one else.” <span class="nums">about 0.93 · supported 0.48 · contradicted 0.48</span></li><li>“./target/release/verify client-report check --decision 447 --jev                            # card 521, read-only” <span class="nums">about 0.61 · supported 0.45 · contradicted 0.33</span></li></ul>
+<h4>The CRM verifier (7)</h4><ul class="plain"><li>“An account no source ties to the client is a question for Will.” <span class="nums">about 0.57 · supported 0.31 · contradicted 0.23</span></li><li>“A by-hand run takes about a minute.” <span class="nums">about 0.74 · supported 0.47 · contradicted 0.26</span></li><li>“A run that did not read every Barbara table and every AR source it uses clears no alert: it keeps the list and only adds a new alert (real case 2026-10-05: a run that read nothing emptied the list, and the next run found the same 5 payments again as new).” <span class="nums">about 0.87 · supported 0.59 · contradicted 0.59</span></li><li>“How real data is read (the tree&#x27;s notes say the same):” <span class="nums">about 0.75 · supported 0.33 · contradicted 0.21</span></li><li>“A schedule row reaches a client by id only: a Stripe subscription&#x27;s link, a Mercury billing email&#x27;s customer link, an Upwork contract&#x27;s payments and the company link.” <span class="nums">about 0.92 · supported 0.59 · contradicted 0.55</span></li><li>“Five Jev checks read the cited sources (the source is about this client, it states the new value, it shows the end, the note is in it, the new Notes card keeps the old facts).” <span class="nums">about 0.85 · supported 0.40 · contradicted 0.29</span></li><li>“The draft as Will read it: <code>verify/tests/fixtures/crm-draft-2026-10-02.toml</code>; the same with only the rule codes made words: <code>crm-draft-2026-10-02.plain.toml</code> (a test fails if a line is dropped or changed, or if a code is left in the text).” <span class="nums">about 0.76 · supported 0.44 · contradicted 0.42</span></li></ul>
+<h4>The Payroll verifier (8)</h4><ul class="plain"><li>“That is the bank payments and payees, the card account&#x27;s Upwork charges, the team&#x27;s invoices at finance@, Stacey&#x27;s two sheets, and the AR sources.” <span class="nums">about 0.87 · supported 0.53 · contradicted 0.39</span></li><li>“So it checks that each contractor is paid, the right amount, once, and only with Will&#x27;s approval.” <span class="nums">about 0.83 · supported 0.47 · contradicted 0.49</span></li><li>“A goal that is not in its tree is never judged, never asks Jev, and never makes a finding.” <span class="nums">about 0.48 · supported 0.22 · contradicted 0.31</span></li><li>“Each person&#x27;s hours that week must be within their own cap in <code>data/money-out/team.toml</code> (Abdullah Asim: 30 hours at $30).” <span class="nums">about 0.81 · supported 0.47 · contradicted 0.27</span></li><li>“So a week with two people was a false warning.” <span class="nums">about 0.85 · supported 0.52 · contradicted 0.38</span></li><li>“Not pay. Every contractor bill is a Theatrisoft payment.” <span class="nums">about 0.82 · supported 0.40 · contradicted 0.42</span></li><li>“It is sorted as software, not pay.” <span class="nums">about 0.85 · supported 0.41 · contradicted 0.44</span></li><li>“When Upwork does not load. The old sort holds, and the Upwork checks are NOT RUN, never a pass.” <span class="nums">about 0.83 · supported 0.35 · contradicted 0.40</span></li></ul>
+<h4>The Money out verifier (9)</h4><ul class="plain"><li>“Fixed pay needs no invoice; hourly and commission pay need one at finance@, and no invoice is never a FAIL.” <span class="nums">about 0.71 · supported 0.30 · contradicted 0.19</span></li><li>“Shane&#x27;s commission lines are computed from the 2026-08-04 rate table and Stacey&#x27;s sheet Sales commissions.” <span class="nums">about 0.78 · supported 0.46 · contradicted 0.26</span></li><li>“Commission on a client who pays through Upwork is on the full price, not on what is left after Upwork&#x27;s fee.” <span class="nums">about 0.86 · supported 0.24 · contradicted 0.07</span></li><li>“No client ad spend on DWA cards.” <span class="nums">about 0.87 · supported 0.48 · contradicted 0.10</span></li><li>“A refund needs Will&#x27;s decision row, his AR decision, or a proven duplicate charge.” <span class="nums">about 0.72 · supported 0.38 · contradicted 0.25</span></li><li>“The AR sources through the AR verifier&#x27;s own reader.” <span class="nums">about 0.82 · supported 0.34 · contradicted 0.36</span></li><li>“Each goal that is not a PASS is one finding, keyed <code>money-out:&lt;goal&gt;:&lt;subject&gt;</code>, with the amount when the subject is one payment.” <span class="nums">about 0.77 · supported 0.46 · contradicted 0.35</span></li><li>“Stacey&#x27;s approval of each run on a card is not read: the verifier cannot see cards.” <span class="nums">about 0.83 · supported 0.33 · contradicted 0.18</span></li><li>“Lists: <code>data/money-out/</code> (see <code>data/README.md</code>).” <span class="nums">about 0.66 · supported 0.29 · contradicted 0.23</span></li></ul>
+<h4>The Meta Ads verifier (5)</h4><ul class="plain"><li>“Every setup, new ad, change, and live account reaches only the planned people, shows approved ads, and leaks nothing.” <span class="nums">about 0.88 · supported 0.24 · contradicted 0.39</span></li><li>“A by-hand run takes about 2 minutes.” <span class="nums">about 0.72 · supported 0.44 · contradicted 0.22</span></li><li>“It checks spelling, text lengths, sizes per placement, the Page and Instagram account, Meta&#x27;s rewrites, and placeholders.” <span class="nums">about 0.86 · supported 0.39 · contradicted 0.45</span></li><li>“Also audiences, budgets, angles, comments, and the crawler and mobile page loads.” <span class="nums">about 0.75 · supported 0.33 · contradicted 0.31</span></li><li>“The login question is one: reads use the roster&#x27;s token names, and which login writes stays his question.” <span class="nums">about 0.70 · supported 0.49 · contradicted 0.22</span></li></ul>
+<h4>The Merchant Center verifier (7)</h4><ul class="plain"><li>“The counts come from the account&#x27;s own status read, which covers every product.” <span class="nums">about 0.86 · supported 0.37 · contradicted 0.46</span></li><li>“Then business details, return policies, shipping, and US tax; account issues; product counts per destination; and disapprovals sized by their 30 days of spend.” <span class="nums">about 0.83 · supported 0.54 · contradicted 0.48</span></li><li>“What is not built. The page loads: the price spot check and the landing page goal.” <span class="nums">about 0.91 · supported 0.48 · contradicted 0.24</span></li><li>“Also supplemental rows that match nothing, the site&#x27;s shipping and sale pages (Jev), and the line in the client log.” <span class="nums">about 0.81 · supported 0.41 · contradicted 0.32</span></li><li>“The free listing clicks need a Reports search, which is a POST, so they are not read.” <span class="nums">about 0.70 · supported 0.35 · contradicted 0.22</span></li><li>“Google&#x27;s alert emails in will@ are not read yet.” <span class="nums">about 0.79 · supported 0.29 · contradicted 0.27</span></li><li>“They also set the shapes of the three optional files.” <span class="nums">about 0.83 · supported 0.44 · contradicted 0.17</span></li></ul>
+<h4>The Conversion tracking verifier (3)</h4><ul class="plain"><li>“The test that held every approved line of the Google Ads tree was removed, with its copy of the approved tree.” <span class="nums">about 0.83 · supported 0.46 · contradicted 0.38</span></li><li>“What it checks.” <span class="nums">about 0.73 · supported 0.39 · contradicted 0.18</span></li><li>“A goal that is not built shows on the page with its questions, its checks, and real cases from the client notebook.” <span class="nums">about 0.81 · supported 0.48 · contradicted 0.39</span></li></ul>
+<h4>Self-contained (7)</h4><ul class="plain"><li>“Everything the conductor runs is in this repo (build 5h, 2026-10-02).” <span class="nums">about 0.80 · supported 0.32 · contradicted 0.35</span></li><li>“No code calls a retired Python, TypeScript, or shell project.” <span class="nums">about 0.77 · supported 0.42 · contradicted 0.26</span></li><li>“The pull, the email send, the meeting matcher, and the voice check are Rust.” <span class="nums">about 0.81 · supported 0.33 · contradicted 0.42</span></li><li>“<code>cargo nextest run -p conductor --test all self_contained::</code> keeps it so.” <span class="nums">about 0.86 · supported 0.43 · contradicted 0.20</span></li><li>“It fails on:” <span class="nums">about 0.83 · supported 0.27 · contradicted 0.26</span></li><li>“any code that names a Python setup (<code>.venv</code>, <code>uv</code>, <code>npm</code>, <code>pytest</code>).” <span class="nums">about 0.91 · supported 0.62 · contradicted 0.53</span></li><li>“Its nightly still runs outside and applies negatives.” <span class="nums">about 0.76 · supported 0.25 · contradicted 0.15</span></li></ul>
+<h4>Where things are (2)</h4><ul class="plain"><li>“<span class="row">Playbooks › </span><code>playbooks/</code> (copied from dwa-conductor, unchanged)” <span class="nums">about 0.39 · supported 0.26 · contradicted 0.16</span></li><li>“<span class="row">Client notebook (roster, rules, notes, logs, targets, briefs; daily snapshots in <code>data/snapshots/</code>, not committed) › </span>Nothing outside this repo reads or writes it.” <span class="nums">about 0.89 · supported 0.50 · contradicted 0.38</span></li></ul>
+</details>
+
+<h2>Method and limits</h2>
+<ul class="method">
+<li><b>Claims.</b> The README was split into 1191 sentences, bullet items, table cells, and commented
+command lines, each with its section and the text before it. One Jev question per unit asked whether it states how
+the code works now. 1072 passed (at 0.5 or more). I picked that question by testing three
+wordings against 60 units I labeled by hand; it agreed with 53.</li>
+<li><b>Code per claim.</b> A program ranked about 18,000 code chunks (functions, tree tables, script windows) by
+the names each claim gives: paths, module paths, commands and flags, function and type names, tree ids, quoted page
+text, and numbers. It also used the claim's table row, its context, and the paths its section names, and it
+followed the calls of the top chunks one step. Jev then judged each of the top ~40 chunks: "is this the code the
+claim is about?" The best chunks went into the final question, at most about 22k tokens.</li>
+<li><b>Judgments.</b> One request per claim, three Jev questions over the same code: about (is this the right
+code), supported (does it do what the claim says), and contradicted (does it do something different). A program
+also said where each named file or function is, or that it is missing.</li>
+<li><b>Status rules.</b> No code found: about under 0.35. Contradicted: contradicted
+0.5 or more and higher than supported. Supported: supported 0.5 or more, and at least
+0.15 over contradicted. Else Unclear. I checked these on the data; the margin moved 23 near-ties
+from Supported to Unclear.</li>
+<li><b>My review.</b> I read the code for every claim Jev marked contradicted (45), not only the top
+20.</li>
+<li><b>Cost.</b> One full pass: 2,327 Jev requests, 25.0M input tokens,
+$1.05. All runs while I built and tested this: 2,481 requests,
+26.7M tokens, $1.12. Price: $0.042 per million input tokens.</li>
+<li><b>How far to trust "supported".</b> To test Jev&#x27;s &quot;supported&quot;, I read the code for 20 random supported claims: 16 were right, 2 were wrong, and 2 could not be told from code. So some &quot;supported&quot; claims are wrong too, about 1 in 10 in this small sample. The 2 wrong ones are under Real
+mismatches. A sample of 20 has a wide error: the true rate can be from about 1 in 100 to 1 in 3.</li>
+<li><b>Limits.</b> Jev saw snippets, not whole files, so a claim about what code never does ("it only reads") can
+read as supported when the shown code agrees and other code differs. Claims about timing, test speed, or live state (cards, clients) cannot be
+shown by code. The repo was read at one commit; later commits are not in this report.</li>
+<li><b>Files.</b> The scripts, logs, and raw results are in <code>~/Projects/docs-vs-code-check/</code>
+(<code>out/results.json</code> holds every claim with its code and Jev's numbers).</li>
+</ul>
+</main>
+</body>
+</html>
